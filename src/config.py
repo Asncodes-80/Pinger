@@ -12,7 +12,7 @@ What we will use in this config file:
  py /src/main.py <-b or --building> (setare|main|huawei)
 """
 
-time_to_wait = 100
+time_to_wait = 5
 
 main_config = {
     # Change this string if you want use the replicated Mongos database
