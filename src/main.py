@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 
 def main(buildingName: str = "huawei", ip: str = "127.0.0.1"):
-    print(f"Ping function started in {buildingName} buildign...")
+    print(f"Ping function started in {buildingName} building...")
 
     while True:
         brain.ping_by_config(config.__dict__[buildingName], ip)

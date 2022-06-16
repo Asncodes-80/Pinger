@@ -7,6 +7,8 @@ from datetime import datetime
 from typing import Dict
 import subprocess
 import model
+import platform
+import os
 
 
 def ps_command(ip: str):
@@ -16,31 +18,41 @@ def ps_command(ip: str):
     Pipe "|" of select-string -pattern only for getting replay of ping.
     """
     try:
-        ps_default_path = (
-            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
-        )
-        run = [ps_default_path, f"ping -n 1 {ip} | select-string -pattern 'Reply'"]
-        # Decode the output of the command to normal and simple string witout \n\r and etc...
-        res = str(subprocess.check_output(run).decode("utf-8"))
-        # Will return 128 as ttl and keep that as string, to
-        # getting only number of ttl like 64 or 128
-        ttl = int(res.split(" ")[5].strip()[4:])  # make it integer
-        # Check if ttl is not 0ms or above of 10ms, True is okay, and False is not connected.
-        if ttl > 10:
-            return True
-        else:
-            return False
+        
+        if platform.system() == "Windows": 
+            ps_default_path = (
+                "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+            )
+            run = [ps_default_path, f"ping -n 1 {ip} | select-string -pattern 'Reply'"]
+            # Decode the output of the command to normal and simple string witout \n\r and etc...
+            res = str(subprocess.check_output(run).decode("utf-8"))
+            # Will return 128 as ttl and keep that as string, to
+            # getting only number of ttl like 64 or 128
+            ttl = int(res.split(" ")[5].strip()[4:])  # make it integer
+            # Check if ttl is not 0ms or above of 10ms, True is okay, and False is not connected.
+            if ttl > 10:
+                return True
+            else:
+                return False
+ 
+        if platform.system() == "Linux":
+            if os.system(f"ping -c 1 {ip}") == 0:
+                return True
+            else :
+                return False
+                
 
     except Exception as err:
         print(f"Error in ping function: {err}")
         return False
+    
 
 
 def ping_by_config(config: Dict, srcIP: str):
     """Ping the host by config.py"""
 
     """Connected to Mongodb with connection string constructor"""
-    log = model.MongoDB(main_config["db"]["conn_string"])
+    # log = model.MongoDB(main_config["db"]["conn_string"])
 
     for nodes in config:
         for obj in config[nodes]:
@@ -51,12 +63,12 @@ def ping_by_config(config: Dict, srcIP: str):
                 if ping_result == False:
                     print(f"Failed ping n1 src: {srcIP}, dst: {ip}")
                     # More info in insert_one method
-                    log.insert_one(
-                        {
-                            "src": srcIP,
-                            "dst": ip,
-                            "node": node,
-                            "timestamp": int(datetime.now().timestamp()),
-                            "dateTime": str(datetime.now()),
-                        }
-                    )
+                    # log.insert_one(
+                    #     {
+                    #         "src": srcIP,
+                    #         "dst": ip,
+                    #         "node": node,
+                    #         "timestamp": int(datetime.now().timestamp()),
+                    #         "dateTime": str(datetime.now()),
+                    #     }
+                    # )
